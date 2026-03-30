@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Day Counter</title>
+
+  <!-- Bootstrap 5 CSS (dark mode enabled via data-bs-theme="dark" on <html>) -->
+  <link rel="stylesheet" href="vendor/bootstrap.min.css" />
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="vendor/bootstrap-icons.min.css" />
+
+  <style>
+    body {
+      min-height: 100vh;
+    }
+    .counter-card {
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .counter-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .day-count {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .day-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    .badge-range {
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-dark border-bottom border-secondary">
+      <div class="container">
+        <span class="navbar-brand fw-bold fs-4">
+          <i class="bi bi-calendar-range me-2 text-primary"></i>Day Counter
+        </span>
+        <button
+          class="btn btn-primary btn-sm"
+          @click="showForm = !showForm"
+        >
+          <i class="bi" :class="showForm ? 'bi-x-lg' : 'bi-plus-lg'"></i>
+          {{ showForm ? 'Cancel' : 'Add Counter' }}
+        </button>
+      </div>
+    </nav>
+
+    <main class="container py-5">
+
+      <!-- Add Counter Form -->
+      <div v-if="showForm" class="card bg-secondary-subtle border-secondary mb-5">
+        <div class="card-body">
+          <h5 class="card-title mb-3">
+            <i class="bi bi-plus-circle me-2 text-primary"></i>New Counter
+          </h5>
+          <form @submit.prevent="submitForm">
+            <div class="mb-3">
+              <label class="form-label" for="formLabel">Label</label>
+              <input
+                id="formLabel"
+                v-model="formLabel"
+                type="text"
+                class="form-control"
+                placeholder="e.g. Wedding Anniversary"
+                maxlength="80"
+              />
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-sm-6">
+                <label class="form-label" for="formStart">Start Date</label>
+                <input
+                  id="formStart"
+                  v-model="formStart"
+                  type="date"
+                  class="form-control"
+                />
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label" for="formEnd">
+                  End Date
+                  <span class="text-secondary">(leave blank for today)</span>
+                </label>
+                <input
+                  id="formEnd"
+                  v-model="formEnd"
+                  type="date"
+                  class="form-control"
+                  :min="formStart"
+                />
+              </div>
+            </div>
+            <div v-if="formError" class="alert alert-danger py-2 mb-3" role="alert">
+              {{ formError }}
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Add
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Empty state -->
+      <div v-if="displayCounters.length === 0" class="text-center text-secondary py-5">
+        <i class="bi bi-calendar-x display-3"></i>
+        <p class="mt-3 fs-5">No counters yet. Add one to get started!</p>
+      </div>
+
+      <!-- Counter Cards -->
+      <div class="row g-4">
+        <div
+          v-for="counter in displayCounters"
+          :key="counter.index"
+          class="col-sm-6 col-lg-4"
+        >
+          <div class="card h-100 counter-card bg-dark border-secondary">
+            <div class="card-body d-flex flex-column">
+              <!-- Label & remove button -->
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <h5 class="card-title mb-0 me-2">{{ counter.label }}</h5>
+                <button
+                  class="btn btn-sm btn-outline-danger flex-shrink-0"
+                  title="Remove counter"
+                  @click="removeCounter(counter.index)"
+                >
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+
+              <!-- Day count -->
+              <div class="text-center my-auto py-3">
+                <div
+                  class="day-count"
+                  :class="counter.isNegative ? 'text-warning' : 'text-primary'"
+                >
+                  {{ counter.days.toLocaleString() }}
+                </div>
+                <div class="day-label text-secondary mt-1">
+                  {{ Math.abs(counter.days) === 1 ? 'day' : 'days' }}
+                  {{ counter.isNegative ? 'remaining' : 'elapsed' }}
+                </div>
+              </div>
+
+              <!-- Date range badge -->
+              <div class="mt-3 d-flex flex-wrap gap-1 justify-content-center">
+                <span class="badge bg-secondary badge-range">
+                  <i class="bi bi-calendar-check me-1"></i>{{ counter.startDate }}
+                </span>
+                <span class="badge bg-secondary text-secondary mx-1">→</span>
+                <span class="badge bg-secondary badge-range">
+                  <i class="bi bi-calendar-event me-1"></i>{{ counter.endLabel }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Share hint -->
+      <div v-if="displayCounters.length > 0" class="text-center mt-5 text-secondary small">
+        <i class="bi bi-share me-1"></i>
+        Share this page's URL to let others see your counters.
+      </div>
+    </main>
+  </div>
+
+  <!-- Vue 3 -->
+  <script src="vendor/vue.global.prod.js"></script>
+
+  <!-- Bootstrap 5 JS bundle (includes Popper) -->
+  <script src="vendor/bootstrap.bundle.min.js"></script>
+
+  <!-- App logic -->
+  <script src="app.js"></script>
+</body>
+</html>
