@@ -2,5 +2,9 @@
   {
     "label": "Days since 2023-11-25",
     "startDate": "2023-11-25"
+  },
+  {
+    "label": "Days since 2022-07-04",
+    "startDate": "2022-07-05"
   }
 ]
