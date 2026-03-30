@@ -1,15 +1,6 @@
 [
   {
-    "label": "New Year 2025",
-    "startDate": "2025-01-01"
-  },
-  {
-    "label": "Summer Solstice 2024",
-    "startDate": "2024-06-20"
-  },
-  {
-    "label": "Year 2024",
-    "startDate": "2024-01-01",
-    "endDate": "2024-12-31"
+    "label": "Days since 2023-11-25",
+    "startDate": "2023-11-25"
   }
 ]
